@@ -18,9 +18,12 @@ define( function( require ) {
   var ResetAllButton = require( 'SCENERY_PHET/buttons/ResetAllButton' );
   var TextPushButton = require( 'SUN/buttons/TextPushButton' );
   var VBox = require( 'SCENERY/nodes/VBox' );
+  var Vector2 = require( 'DOT/Vector2' );
 
   // strings
   var flipPolarityString = require( 'string!EXAMPLE_SIM/flipPolarity' );
+  var moveBarMagnetString = require( 'string!EXAMPLE_SIM/moveBarMagnet' );
+  var addBarMagnetString = require( 'string!EXAMPLE_SIM/addBarMagnet' );
 
   /**
    * @param {ExampleModel} model - the model for the entire screen
@@ -37,16 +40,35 @@ define( function( require ) {
         lineWidth: 3
       }, options );
 
-    // 'Flip Polarity' button
-    var flipButton = new TextPushButton( flipPolarityString, {
-      font: new PhetFont( 16 ),
-      baseColor: 'yellow',
-      xMargin: 10,
-      listener: function() {
-        var orientation = model.barMagnet.orientationProperty.get() + Math.PI;
-        model.barMagnet.orientationProperty.set( orientation );
-      }
+    // Gives the same uniform button options for all buttons
+    var defaultButtonOptions = ( listener ) => ( {
+          font: new PhetFont( 16 ),
+          baseColor: 'yellow',
+          xMargin: 10,
+          listener: listener
     } );
+
+    // 'Flip Polarity' button
+    var flipButton = new TextPushButton( flipPolarityString, defaultButtonOptions(
+        function() {
+          var orientation = model.originalBarMagnet.orientationProperty.get() + Math.PI;
+          model.originalBarMagnet.orientationProperty.set( orientation );
+        }
+    ) );
+
+    // 'Move Bar Magnet' button
+    var moveButton = new TextPushButton( moveBarMagnetString, defaultButtonOptions(
+        function() {
+          model.originalBarMagnet.locationProperty.set( model.randomBarLocation() );
+        }
+    ) );
+
+    // 'Add Bar Magnet' button
+    var addButton = new TextPushButton( addBarMagnetString, defaultButtonOptions(
+        function() {
+          model.addMagnetToView( model.newBarMagnet() );
+        }
+    ) );
 
     // 'Reset All' button, resets the sim to its initial state
     var resetAllButton = new ResetAllButton( {
@@ -61,6 +83,8 @@ define( function( require ) {
       spacing: 10,
       children: [
         flipButton,
+        moveButton,
+        addButton,
         resetAllButton
       ]
     } );

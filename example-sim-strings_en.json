@@ -4,5 +4,11 @@
   },
   "flipPolarity": {
     "value": "Flip Polarity"
+  },
+  "moveBarMagnet": {
+    "value": "Move Bar Magnet"
+  },
+  "addBarMagnet": {
+    "value": "Add Bar Magnet"
   }
 }

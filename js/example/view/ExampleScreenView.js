@@ -36,11 +36,36 @@ define( function( require ) {
     var center = new Vector2( this.layoutBounds.width / 2, this.layoutBounds.height / 2 );
     var modelViewTransform = ModelViewTransform2.createOffsetScaleMapping( center, 1 );
 
-    this.addChild( new BarMagnetNode( model.barMagnet, modelViewTransform ) );
+    // An array of BarMagnetNodes that have been added after the initial node
+    var addedMagnetNodes = [];
+
+    /**
+     * This code assumes that there will only be one view of the model. When model wants to
+     * add a new BarMagnet, or remove all added ones, it needs a reference to `this`
+     * to be able to [add|remove]Child from this ExampleScreenView Node.
+     * By passing this through directly, if two views on the model were required this would not work.
+     */
+    var thisView = this;
+
+    // Creates a new BarMagnetNode by transforming the barMagnetModel passed in.
+    // If added is true, then the node is appended to an array of nodes to be removed on reset.
+    function newMagnetChild ( barMagnetModel, added ) {
+        var node = new BarMagnetNode( barMagnetModel, modelViewTransform );
+        if ( added ) addedMagnetNodes.push( node );
+        thisView.addChild( node );
+    }
+
+    newMagnetChild( model.originalBarMagnet, false );
     this.addChild( new ControlPanel( model, {
       x: 50,
       y: 50
     } ) );
+
+    // The model object needs references to our methods to add new magnets and remove added ones.
+    model.addMagnetToView = ( barMagnetModel ) => newMagnetChild( barMagnetModel, true );
+    model.removeAddedMagnetsFromView = () => {
+        while ( addedMagnetNodes.length ) thisView.removeChild( addedMagnetNodes.pop() );
+    }
   }
 
   exampleSim.register( 'ExampleScreenView', ExampleScreenView );

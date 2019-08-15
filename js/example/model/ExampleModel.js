@@ -23,8 +23,25 @@ define( function( require ) {
    */
   function ExampleModel() {
 
-    // @public {BarMagnet} initial bar magnet model element
-    this.barMagnet = new BarMagnet( new Dimension2( 262.5, 52.5 ), new Vector2( 0, 0 ), 0 );
+    /**
+     * The region, in model coordinates, where we can draw a bar magnet is calculated from:
+     *  - LayoutBounds defined in ExampleScreenViews as (768, 504)
+     *  - The bar magnet dimensions set below as (262.5, 52.5)
+     * Could have not hard coded this (passing LayoutBounds down from the ScreenView), but went for simplicity.
+     * Also, the sim retains its aspect ratio of course, so will only spawn within Layout bounds, not anywhere in the canvas.
+     */
+
+    this.randomBarLocation = () => new Vector2( Math.random() * (758 - 262.5) - (758 - 262.5) / 2,
+                                                Math.random() * (504 -  52.5) - (504 -  52.5) / 2 );
+
+    // If specified, returns a BarMagnet at location, otherwise will return at a random location.
+    this.newBarMagnet = (location) => new BarMagnet( new Dimension2( 262.5, 52.5 ),
+                                                     location || this.randomBarLocation(),
+                                                     0 );
+
+    // This is the special bar magnet which is created at init. It will not be removed from the ScreenView.
+    this.originalBarMagnet = this.newBarMagnet( new Vector2( 0, 0 ) );
+
   }
 
   exampleSim.register( 'ExampleModel', ExampleModel );
@@ -37,7 +54,8 @@ define( function( require ) {
     * @public
     */
     reset: function() {
-      this.barMagnet.reset();
+      this.originalBarMagnet.reset();
+      this.removeAddedMagnetsFromView();
     }
   } );
 } );
